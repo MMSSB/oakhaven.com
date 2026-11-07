@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oakhaven Vanguard: The Sunstone Quest</title>
+    <!-- Importing Pixel Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS Variables for Theme --- */
+        :root {
+            --obsidian: #1a2332;
+            --obsidian-light: #243045;
+            --crimson: #d02c35;
+            --crimson-light: #e84a53;
+            --blue: #2e5cb8;
+            --sky-blue: #5abadd;
+            --green: #4c8b41;
+            --grass-green: #3a6b32;
+            --silver: #8a98a8;
+            --silver-light: #c0cad4;
+            --gold: #ffd700;
+            --text-main: #f0f0f0;
+        }
+
+        /* --- Reset & Base Styles --- */
+        * { box-sizing: border-box; margin: 0; padding: 0;   -webkit-tap-highlight-color: transparent; }
+
+        body {
+            /* Pixel Art Landscape Background */
+            background: linear-gradient(to bottom, var(--sky-blue) 0%, var(--sky-blue) 60%, var(--green) 60%, var(--grass-green) 100%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* CRT Scanline Overlay */
+        .crt::after {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            /* background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); */
+            z-index: 999;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        /* Pixel Clouds (Box Shadow Hack) */
+        .pixel-clouds {
+            position: fixed;
+            top: 50px;
+            left: -100px;
+            width: 40px;
+            height: 20px;
+            background: white;
+            box-shadow: 
+                40px 0px 0 white, 80px 0px 0 white, 120px 0px 0 white, 
+                20px -20px 0 white, 60px -20px 0 white, 100px -20px 0 white,
+                600px 50px 0 white, 640px 50px 0 white, 680px 50px 0 white,
+                620px 30px 0 white, 660px 30px 0 white,
+                80vw 20px 0 white, calc(80vw + 40px) 20px 0 white, calc(80vw + 20px) 0px 0 white;
+            animation: cloud-move 60s linear infinite;
+            z-index: 0;
+            opacity: 0.8;
+        }
+        @keyframes cloud-move {
+            0% { transform: translateX(-10vw); }
+            100% { transform: translateX(110vw); }
+        }
+
+        h1, h2, h3, .pixel-heading {
+            font-family: 'Press Start 2P', cursive;
+            color: var(--silver-light);
+            text-transform: uppercase;
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            text-shadow: 3px 3px 0px var(--obsidian);
+        }
+
+        a { color: var(--gold); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: var(--crimson-light); }
+
+        /* --- Layout & Sections --- */
+        header {
+            background-color: var(--obsidian);
+            border-bottom: 4px solid var(--silver);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links { display: flex; gap: 2rem; list-style: none; align-items: center; }
+        .nav-links a { font-family: 'Press Start 2P', cursive; font-size: 0.7rem; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; position: relative; z-index: 1; }
+
+        /* Pixel Art Box Styling (True 8-bit Border) */
+        .pixel-box {
+            background-color: var(--obsidian-light);
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 
+                -4px 0 0 0 var(--silver),
+                4px 0 0 0 var(--silver),
+                0 -4px 0 0 var(--silver),
+                0 4px 0 0 var(--silver),
+                -8px 0 0 0 var(--obsidian),
+                8px 0 0 0 var(--obsidian),
+                0 -8px 0 0 var(--obsidian),
+                0 8px 0 0 var(--obsidian);
+        }
+
+        /* --- Hero Section --- */
+        #hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: rgba(26, 35, 50, 0.85);
+            margin-top: 2rem;
+        }
+
+        .badge {
+            background-color: var(--crimson);
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1rem;
+            border: 2px solid var(--gold);
+            animation: blink 2s infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* --- Character & Story Section --- */
+        #character-story {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            background: var(--obsidian);
+        }
+
+        .hero-icon {
+            width: 150px;
+            height: 150px;
+            image-rendering: pixelated;
+            border: 4px solid var(--silver);
+            box-shadow: 4px 4px 0px var(--obsidian);
+            background-color: var(--obsidian); 
+        }
+
+        .floating { animation: float 3s ease-in-out infinite; }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .typewriter-container {
+            flex: 1;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            line-height: 1.8;
+            color: var(--gold);
+            min-height: 150px; /* Prevent layout shift */
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
+            background-color: var(--green);
+            vertical-align: bottom;
+            animation: blink-caret 0.75s step-end infinite;
+            margin-left: 4px;
+        }
+
+        @keyframes blink-caret { from, to { opacity: 1 } 50% { opacity: 0; } }
+
+        #hero h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        #hero .subtitle { font-family: 'Press Start 2P', cursive; font-size: 1rem; margin-bottom: 2.5rem; text-shadow: none; }
+
+        /* --- Buttons --- */
+        .btn {
+            display: inline-block;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            padding: 1rem 2rem;
+            background-color: var(--crimson);
+            color: white;
+            border: 4px solid white;
+            box-shadow: inset -4px -4px 0px rgba(0,0,0,0.4), 4px 4px 0px var(--obsidian);
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: transform 0.1s, filter 0.1s;
+        }
+        .btn:disabled {
+            filter: grayscale(1);
+            cursor: not-allowed;
+            transform: translateY(0);
+        }
+
+        .btn:not(:disabled):hover { filter: brightness(1.2); transform: translateY(-2px); }
+        .btn:not(:disabled):active { box-shadow: inset 4px 4px 0px rgba(0,0,0,0.6); transform: translate(2px, 2px); }
+
+        .btn-nav { background-color: var(--blue); padding: 0.5rem 1rem; border: 2px solid white; font-size: 0.6rem; }
+        
+        /* Hamburger Menu */
+        .menu-toggle { display: none; flex-direction: column; cursor: pointer; gap: 5px; }
+        .menu-toggle .bar { width: 25px; height: 3px; background-color: white; transition: all 0.3s ease; }
+
+        /* --- Grid Layouts & Cards --- */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        
+        .card {
+            background-color: var(--obsidian);
+            border: 2px solid var(--silver);
+            padding: 1.5rem;
+            box-shadow: inset -4px -4px 0px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+        }
+        .card:hover { transform: scale(1.02); border-color: var(--gold); }
+        .card h3 { font-size: 1.2rem; color: var(--blue); text-shadow: 2px 2px 0px var(--obsidian); margin-bottom: 1rem; }
+
+        ul.pixel-list { list-style: none; margin-left: 1rem; }
+        ul.pixel-list li { position: relative; margin-bottom: 0.8rem; }
+        ul.pixel-list li::before { content: "►"; position: absolute; left: -1.5rem; color: var(--gold); font-size: 0.8rem; top: 0.2rem; }
+
+        /* --- Screenshots & Downloads Sections --- */
+        .screenshot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+        
+        .pixel-placeholder {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: repeating-linear-gradient(45deg, var(--obsidian) 0px, var(--obsidian) 10px, var(--obsidian-light) 10px, var(--obsidian-light) 20px);
+            border: 4px solid var(--silver);
+            box-shadow: 4px 4px 0px var(--obsidian);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            color: var(--silver-light);
+            text-align: center;
+            /* padding: 1rem; */
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .pixel-placeholder:hover { transform: scale(1.05); border-color: var(--green); }
+
+        .os-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem; }
+        .os-btn[data-os="windows"] { background-color: var(--blue); }
+        .os-btn[data-os="mac"] { background-color: var(--silver); color: var(--obsidian); border-color: var(--obsidian); }
+        .os-btn[data-os="linux"] { background-color: var(--green); }
+
+        /* --- Custom RPG Dialogue Box Modal --- */
+        #custom-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 5vh;
+        }
+
+        .dialogue-box {
+            background: var(--obsidian);
+            border: 6px solid white;
+            border-radius: 4px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.2), 8px 8px 0px rgba(0,0,0,0.8);
+            position: relative;
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .speaker-name {
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            background: var(--crimson);
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            padding: 0.5rem 1rem;
+            border: 4px solid white;
+            font-size: 0.8rem;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.8);
+        }
+
+        .dialogue-box p { font-family: 'Press Start 2P', cursive; font-size: 0.9rem; line-height: 1.8; color: white; margin-bottom: 1.5rem; }
+        .next-arrow { position: absolute; bottom: 20px; right: 20px; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid var(--gold); animation: bounce 0.5s alternate infinite; }
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(5px); } }
+
+        /* Loading Dots Animation for Downloads */
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; } }
+
+        /* --- Lightbox Gallery Styles --- */
+        #lightbox-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 1050; justify-content: center; align-items: center; }
+        .lightbox-content { position: relative; max-width: 90%; max-height: 85vh; border: 6px solid var(--silver); background-color: var(--obsidian); box-shadow: 8px 8px 0px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; }
+        .lightbox-img { max-width: 100%; max-height: 80vh; object-fit: contain; image-rendering: pixelated; display: block; background: var(--obsidian-light); }
+        .lightbox-btn { position: absolute; top: 50%; transform: translateY(-50%); background: var(--crimson); color: white; border: 4px solid white; font-family: 'Press Start 2P', cursive; font-size: 1.5rem; padding: 0.5rem; cursor: pointer; box-shadow: 4px 4px 0px rgba(0,0,0,0.8); z-index: 10; transition: filter 0.1s, transform 0.1s; }
+        .lightbox-btn:hover { filter: brightness(1.2); }
+        .lightbox-btn:active { box-shadow: 2px 2px 0px rgba(0,0,0,0.8); transform: translateY(-50%) translate(2px, 2px); }
+        .lightbox-prev { left: -25px; }
+        .lightbox-next { right: -25px; }
+        .lightbox-close { position: absolute; top: -20px; right: -20px; background: var(--crimson); color: white; border: 4px solid white; font-family: 'Press Start 2P', cursive; font-size: 1rem; padding: 0.5rem; cursor: pointer; box-shadow: 4px 4px 0px rgba(0,0,0,0.8); z-index: 15; }
+        .lightbox-close:hover { filter: brightness(1.2); }
+
+        footer { text-align: center; padding: 2rem; background-color: var(--obsidian); border-top: 4px solid var(--silver); font-family: 'Press Start 2P', cursive; font-size: 0.6rem; color: var(--silver-light); position: relative; z-index: 1; }
+
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            header { flex-direction: row; justify-content: space-between; padding: 1rem; }
+            .menu-toggle { display: flex; }
+            .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; width: 100%; background-color: var(--obsidian); border-bottom: 4px solid var(--silver); padding: 1rem 0; gap: 1.5rem; }
+            .nav-links.active { display: flex; }
+            #character-story { flex-direction: column; text-align: center; }
+            .typewriter-container { font-size: 0.6rem; min-height: 120px; }
+            
+            /* Responsive Lightbox arrows for mobile */
+            .lightbox-btn { font-size: 1rem; padding: 0.25rem; }
+            .lightbox-prev { left: -10px; }
+            .lightbox-next { right: -10px; }
+            .lightbox-close { top: -15px; right: -15px; font-size: 0.8rem; padding: 0.25rem; }
+        }
+        .shot{
+            width: 100%;
+            height: 100%;
+            object-fit: fill; 
+        }
+    </style>
+</head>
+<body class="crt">
+    <!-- Pixel Clouds Background Elements -->
+    <div class="pixel-clouds"></div>
+    <div class="pixel-clouds" style="top: 150px; animation-duration: 90s; transform: scale(1.5); z-index: -2; opacity: 0.5;"></div>
+
+    <!-- Navigation -->
+    <header>
+        <div class="logo">
+            <a href="#hero" style="font-family: 'Press Start 2P', cursive; font-size: 1rem;">OAKHAVEN VANGUARD</a>
+        </div>
+        <div class="menu-toggle" id="mobile-menu">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+        <ul class="nav-links" id="nav-links">
+            <li><a href="#story" class="scroll-link">Story</a></li>
+            <li><a href="#modes" class="scroll-link">Game Modes</a></li>
+            <li><a href="#combat" class="scroll-link">Combat</a></li>
+            <li><a href="#downloads" class="scroll-link btn btn-nav">Download Beta</a></li>
+        </ul>
+    </header>
+
+    <main class="container">
+        <!-- Hero Section -->
+        <section id="hero" class="pixel-box">
+            <div class="badge">BETA OUT NOW</div>
+            <h1>Oakhaven Vanguard:<br>The Sunstone Quest</h1>
+            <p class="subtitle">Chronicles of the Royal Vanguard</p>
+            <button class="btn scroll-link" href="#downloads">Get the Game</button>
+        </section>
+
+        <!-- New Character & Story Section -->
+        <section id="character-story" class="pixel-box">
+            <img src="images/icon.webp" alt="Captain Kael" class="hero-icon floating" onerror="this.src='images/icon.png'">
+            <div class="typewriter-container" id="story-typewriter">
+                <!-- Text injected via JS -->
+                <span id="typed-text"></span><span class="cursor"></span>
+            </div>
+        </section>
+
+        <!-- The Story Section -->
+        <section id="story" class="pixel-box">
+            <h2>The Lore</h2>
+            <p>For a thousand years, the Sacred Sunstone blessed the kingdom of Oakhaven with eternal warmth. But from the eastern volcanic wastes, Overlord Malakor, Consumer of Suns, rose to shatter the peace.</p>
+            <br>
+            <p>Under cover of an eclipse, the Bloodfang Orc Horde seized the Sunstone, dragging it into eternal shadow. You are <strong>Captain Kael</strong>, the last Knight of the Royal Vanguard. Take up your Sunforged Greatsword and march east through perilous regions to reclaim the light!</p>
+        </section>
+
+        <!-- Game Modes Section -->
+        <section id="modes" class="pixel-box">
+            <h2>Game Modes</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Story Campaign</h3>
+                    <p>An epic 8-Zone narrative journey spanning from the Whispering Woods to the Sunstone Sanctum.</p>
+                    <ul class="pixel-list">
+                        <li>Handcrafted multi-layered terrain</li>
+                        <li>Sacred Checkpoints & Lore Shrines</li>
+                        <li>Mid-Boss duel: Warlord Grommash</li>
+                        <li>Final Showdown: Overlord Malakor</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Endless Vanguard Run</h3>
+                    <p>A non-stop, procedurally generated action runner where the world builds infinitely eastward.</p>
+                    <ul class="pixel-list">
+                        <li>Dynamic difficulty waves</li>
+                        <li>Bonus valleys & platform gauntlets</li>
+                        <li>Battle Colossal Giant Orc Titans</li>
+                        <li>Live score multiplier & global ranks</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Combat & Abilities Section -->
+        <section id="combat" class="pixel-box">
+            <h2>Arsenal & Abilities</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Weapons</h3>
+                    <ul class="pixel-list">
+                        <li><strong>Sunforged Greatsword:</strong> Fast 2-hit combos and heavy cleaves for armor breaking.</li>
+                        <li><strong>Eagle-Eye Longbow:</strong> Ranged precision. Upgrade to unlock twin arrows and triple volleys.</li>
+                        <li><strong>Alchemist's Belt:</strong> Manage Crimson, Emerald, and Golden potions on the fly.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Vanguard Skills</h3>
+                    <ul class="pixel-list">
+                        <li><strong>Perfect Parry:</strong> Time your Shield Guard to reflect damage and stun attackers.</li>
+                        <li><strong>Sky Plunge Slam:</strong> Dive rapidly from mid-air to unleash a ground shockwave.</li>
+                        <li><strong>Sunbreaker Ultimate:</strong> Unleash a massive golden AoE shockwave and heal your wounds!</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Screenshots Section -->
+        <section id="screenshots" class="pixel-box">
+            <h2>Screenshots</h2>
+            <div class="screenshot-grid">
+                <div class="pixel-placeholder gallery-item" data-index="0"><img src="images/oakshot.png" class="shot" alt="Whispering Woods" onerror="this.style.display='none'; this.parentNode.innerHTML='Whispering<br>Woods';"></div>
+                <!-- <div class="pixel-placeholder gallery-item" data-index="1"><img src="images/oakshot2.png" class="shot" alt="Grommash Duel" onerror="this.style.display='none'; this.parentNode.innerHTML='Grommash<br>Duel';"></div>
+                <div class="pixel-placeholder gallery-item" data-index="2"><img src="images/oakshot3.png" class="shot" alt="Endless Titan" onerror="this.style.display='none'; this.parentNode.innerHTML='Endless<br>Titan';"></div> -->
+            </div>
+        </section>
+
+        <section id="downloads" class="pixel-box">
+            <h2>Download Beta (V1.2)</h2>
+            <p>Select your platform to download the latest beta build.</p>
+            <div class="os-buttons">
+                <button class="btn os-btn" data-os="windows">Windows</button>
+                <!-- <button class="btn os-btn" data-os="mac">Mac OS</button>
+                <button class="btn os-btn" data-os="linux">Linux</button> -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Oakhaven Vanguard. All Rights Reserved.</p>
+        <!-- <p style="margin-top: 10px;">Godot Engine 4.x Action-Platformer RPG</p> -->
+    </footer>
+
+    <!-- Custom RPG Dialogue Box Modal -->
+    <div id="custom-modal">
+        <div class="dialogue-box">
+            <div class="speaker-name">SYSTEM LOG</div>
+            <p id="modal-message">Preparing download sequences...</p>
+            <p id="modal-path" style="color: var(--green); word-break: break-all; margin-bottom: 2rem;"></p>
+            <div class="next-arrow"></div>
+            <button class="btn" id="closeModal">Download</button>
+            <!-- <button class="btn" id="closeModal">Acknowledge</button> -->
+        </div>
+    </div>
+
+    <!-- Lightbox Gallery Modal -->
+    <div id="lightbox-modal">
+        <div class="lightbox-content">
+            <button class="lightbox-close" id="lightbox-close">X</button>
+            <!-- <button class="lightbox-btn lightbox-prev" id="lightbox-prev">&lt;</button> -->
+            <img src="" alt="Gallery Preview" class="lightbox-img" id="lightbox-img">
+            <!-- <button class="lightbox-btn lightbox-next" id="lightbox-next">&gt;</button> -->
+        </div>
+    </div>
+
+    <script>
+        const downloadPaths = { windows: 'https://drive.usercontent.google.com/download?id=1ZWdbt9dq9f8avk8V14sEDqKPOri27Ry7&export=download&authuser=0', mac: '', linux: '' };
+        // const downloadPaths = { windows: 'V1.2/Oakhaven Vanguard The Sunstone Quest V1.2 Beta.exe', mac: '', linux: '' };
+        // const downloadPaths = { windows: './builds/oakhaven_vanguard_win64.zip', mac: './builds/oakhaven_vanguard_macos.zip', linux: './builds/oakhaven_vanguard_x11.zip' };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile Menu Toggle Logic
+            const mobileMenu = document.getElementById('mobile-menu');
+            const navLinks = document.getElementById('nav-links');
+
+            mobileMenu.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+            });
+
+            // Smooth Scrolling
+            const scrollLinks = document.querySelectorAll('.scroll-link');
+            scrollLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (this.getAttribute('href').startsWith('#')) {
+                        e.preventDefault();
+                        const targetId = this.getAttribute('href').substring(1);
+                        const targetSection = document.getElementById(targetId);
+                        if (targetSection) {
+                            window.scrollTo({
+                                top: targetSection.offsetTop - 80,
+                                behavior: 'smooth'
+                            });
+                            if(navLinks.classList.contains('active')) {
+                                navLinks.classList.remove('active');
+                            }
+                        }
+                    }
+                });
+            });
+
+            // RPG Modal Logic for Download Buttons & Redirect Animation
+            const osButtons = document.querySelectorAll('.os-btn');
+            const customModal = document.getElementById('custom-modal');
+            const closeModal = document.getElementById('closeModal');
+            const modalMessage = document.getElementById('modal-message');
+            const modalPath = document.getElementById('modal-path');
+            let activeDownloadPath = ""; // Stores the path to navigate to
+
+            osButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const osType = e.target.getAttribute('data-os');
+                    activeDownloadPath = downloadPaths[osType];
+                    
+                    // Reset Modal Content with RPG style text
+                    modalMessage.innerText = `* Download for ${osType.toUpperCase()} module... *`;
+                    // modalMessage.innerText = `* Incoming transmission for ${osType.toUpperCase()} module... *`;
+                    // modalPath.innerText = `Path: ${activeDownloadPath}`;
+                    closeModal.innerText = "Download";
+                    // closeModal.innerText = "Acknowledge";
+                    closeModal.disabled = false;
+                    
+                    customModal.style.display = 'flex';
+                });
+            });
+
+            closeModal.addEventListener('click', () => {
+                if (activeDownloadPath) {
+                    // Start download animation sequence
+                    modalMessage.innerHTML = 'Downloading Game<span class="loading-dots"></span>';
+                    // modalMessage.innerHTML = 'Establishing secure connection<span class="loading-dots"></span>';
+                    // modalPath.innerText = 'Please wait...';
+                    // modalPath.innerText = 'Please wait...';
+                    closeModal.innerText = "Downloading...";
+                    closeModal.disabled = true; // Prevent double-clicking
+                    
+                    // Wait 2 seconds for visual effect, then open link
+                    setTimeout(() => {
+                        window.open(activeDownloadPath, '_blank');
+                        customModal.style.display = 'none';
+                        activeDownloadPath = ""; // clear out
+                    }, 2000);
+                } else {
+                    customModal.style.display = 'none';
+                }
+            });
+
+            // Close modal if user clicks outside of the dialogue box
+            window.addEventListener('click', (e) => {
+                if (e.target === customModal) {
+                    customModal.style.display = 'none';
+                }
+            });
+
+            // Robust JS Typewriter Effect
+            const storyLines = [
+                "\"The Sunstone's light fades...",
+                "But the Vanguard endures!",
+                "I will march east.",
+                "I will reclaim the dawn.\""
+            ];
+            
+            const typedTextSpan = document.getElementById("typed-text");
+            let lineIndex = 0;
+            let charIndex = 0;
+            let isTypingStarted = false;
+
+            function typeWriter() {
+                if (lineIndex < storyLines.length) {
+                    if (charIndex < storyLines[lineIndex].length) {
+                        typedTextSpan.innerHTML += storyLines[lineIndex].charAt(charIndex);
+                        charIndex++;
+                        setTimeout(typeWriter, 50); // Typing speed
+                    } else {
+                        typedTextSpan.innerHTML += "<br><br>";
+                        lineIndex++;
+                        charIndex = 0;
+                        setTimeout(typeWriter, 800); // Delay between lines
+                    }
+                }
+            }
+
+            // Trigger typing when section comes into view
+            const storySection = document.getElementById("character-story");
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && !isTypingStarted) {
+                    isTypingStarted = true;
+                    setTimeout(typeWriter, 500);
+                }
+            }, { threshold: 0.5 });
+            if (storySection) observer.observe(storySection);
+
+            // Lightbox JavaScript Logic
+            const galleryItems = document.querySelectorAll('.gallery-item');
+            const lightboxModal = document.getElementById('lightbox-modal');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxClose = document.getElementById('lightbox-close');
+            const lightboxPrev = document.getElementById('lightbox-prev');
+            const lightboxNext = document.getElementById('lightbox-next');
+            
+            const galleryImages = [
+                'images/oakshot.png',
+                // 'images/oakshot2.png',
+                // 'images/oakshot3.png'
+            ];
+            
+            let currentImgIndex = 0;
+
+            function updateLightboxImage() {
+                // Temporarily unhide to ensure we can swap sources if it errored previously
+                lightboxImg.style.display = 'block'; 
+                lightboxImg.src = galleryImages[currentImgIndex];
+            }
+
+            galleryItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    currentImgIndex = parseInt(item.getAttribute('data-index'));
+                    updateLightboxImage();
+                    lightboxModal.style.display = 'flex';
+                });
+            });
+
+            lightboxClose.addEventListener('click', () => { lightboxModal.style.display = 'none'; });
+            lightboxModal.addEventListener('click', (e) => { 
+                if (e.target === lightboxModal) lightboxModal.style.display = 'none'; 
+            });
+
+            // lightboxPrev.addEventListener('click', () => {
+            //     currentImgIndex = (currentImgIndex > 0) ? currentImgIndex - 1 : galleryImages.length - 1;
+            //     updateLightboxImage();
+            // });
+
+            // lightboxNext.addEventListener('click', () => {
+            //     currentImgIndex = (currentImgIndex < galleryImages.length - 1) ? currentImgIndex + 1 : 0;
+            //     updateLightboxImage();
+            // });
+
+            // Fallback for Lightbox images if they don't exist
+            // lightboxImg.addEventListener('error', function() {
+            //     this.src = '' + (currentImgIndex + 1);
+            // });
+        });
+    </script>
+</body>
+</html>
